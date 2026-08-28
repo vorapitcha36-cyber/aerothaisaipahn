@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum LocationType {
+  CENTER
+  OUTSTATION
+}
+
+enum Region {
+  NORTH
+  NORTHEAST
+  CENTRAL
+  SOUTH
+}
+
+enum WorkflowStatus {
+  DRAFT
+  PENDING_REVIEW
+  CHANGES_REQUESTED
+  ACTIVE
+  ARCHIVED
+}
+
+enum FileScanStatus {
+  UPLOADING
+  QUARANTINED
+  SCANNING
+  CLEAN
+  INFECTED
+  FAILED
+}
+
+enum ReviewDecision {
+  APPROVED
+  CHANGES_REQUESTED
+  ARCHIVED
+}
+
+enum NotificationType {
+  SUBMITTED
+  APPROVED
+  CHANGES_REQUESTED
+  REVIEW_DUE
+  OVERDUE
+  USER_APPROVED
+}
+
+model User {
+  id               String          @id @default(cuid())
+  googleSubject    String?         @unique
+  email            String          @unique
+  displayName      String
+  avatarUrl        String?
+  role             Role            @default(VIEWER)
+  status           UserStatus      @default(PENDING)
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?           @relation("UserApproval", fields: [approvedById], references: [id])
+  approvedUsers    User[]           @relation("UserApproval")
+  createdDocuments DocumentRecord[] @relation("DocumentCreator")
+  reviewedDocuments DocumentRecord[] @relation("DocumentReviewer")
+  versions         DocumentVersion[]
+  reviewActions    ReviewAction[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Location {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  nameTh      String
+  type        LocationType
+  region      Region
+  latitude    Decimal          @db.Decimal(9, 6)
+  longitude   Decimal          @db.Decimal(9, 6)
+  parentId    String?
+  parent      Location?        @relation("LocationTree", fields: [parentId], references: [id])
+  children    Location[]       @relation("LocationTree")
+  active      Boolean          @default(true)
+  documents   DocumentRecord[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([type, active])
+  @@index([region, active])
+}
+
+model Category {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  nameTh      String
+  description String?
+  sortOrder   Int
+  active      Boolean          @default(true)
+  documents   DocumentRecord[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([sortOrder])
+}
+
+model DocumentRecord {
+  id              String          @id @default(cuid())
+  locationId      String
+  categoryId      String
+  referenceNo     String?
+  note            String?
+  performedAt     DateTime
+  nextReviewAt    DateTime
+  workflowStatus  WorkflowStatus  @default(DRAFT)
+  currentVersion  Int             @default(1)
+  createdById     String
+  reviewedById    String?
+  submittedAt     DateTime?
+  publishedAt     DateTime?
+  archivedAt      DateTime?
+  location        Location        @relation(fields: [locationId], references: [id])
+  category        Category        @relation(fields: [categoryId], references: [id])
+  createdBy       User            @relation("DocumentCreator", fields: [createdById], references: [id])
+  reviewedBy      User?           @relation("DocumentReviewer", fields: [reviewedById], references: [id])
+  versions        DocumentVersion[]
+  reviewActions   ReviewAction[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([locationId, categoryId, workflowStatus])
+  @@index([nextReviewAt, workflowStatus])
+}
+
+model DocumentVersion {
+  id          String         @id @default(cuid())
+  documentId  String
+  version     Int
+  referenceNo String?
+  note        String?
+  performedAt DateTime
+  nextReviewAt DateTime
+  createdById String
+  document    DocumentRecord @relation(fields: [documentId], references: [id])
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  file        FileAsset?
+  createdAt   DateTime       @default(now())
+
+  @@unique([documentId, version])
+}
+
+model FileAsset {
+  id              String          @id @default(cuid())
+  versionId       String          @unique
+  originalName    String
+  mimeType        String
+  sizeBytes       Int
+  sha256          String?
+  quarantineKey   String          @unique
+  evidenceKey     String?         @unique
+  scanStatus      FileScanStatus  @default(UPLOADING)
+  scannedAt       DateTime?
+  version         DocumentVersion @relation(fields: [versionId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model ReviewAction {
+  id          String          @id @default(cuid())
+  documentId  String
+  actorId     String
+  decision    ReviewDecision
+  comment     String?
+  document    DocumentRecord  @relation(fields: [documentId], references: [id])
+  actor       User            @relation(fields: [actorId], references: [id])
+  createdAt   DateTime        @default(now())
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  body        String
+  resourceId  String?
+  readAt      DateTime?
+  emailSentAt DateTime?
+  user        User             @relation(fields: [userId], references: [id])
+  createdAt   DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String?
+  ipAddress   String?
+  userAgent   String?
+  beforeJson  Json?
+  afterJson   Json?
+  metadata    Json?
+  actor       User?    @relation(fields: [actorId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+}
