@@ -54,6 +54,10 @@ importers:
       vitest:
         specifier: 2.1.8
         version: 2.1.8(jsdom@25.0.1(supports-color@7.2.0))(supports-color@7.2.0)
+    optionalDependencies:
+      '@rollup/rollup-win32-x64-msvc':
+        specifier: 4.63.0
+        version: 4.63.0
 
 packages:
 
