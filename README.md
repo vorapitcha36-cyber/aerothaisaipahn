@@ -1,26 +1,34 @@
-# AEROTHAI Security Standards Hub
+# AEROTHAI Security Standards Dashboard Prototype
 
-ระบบทะเบียนเอกสารมาตรฐานการรักษาความปลอดภัยสำหรับศูนย์ควบคุมการบินและหอควบคุมย่อย พัฒนาด้วย React, NestJS, PostgreSQL และ MinIO
+Frontend-only prototype สำหรับติดตามมาตรฐานการรักษาความปลอดภัย 9 ศูนย์ควบคุมหลัก 23 หอลูกข่าย และหัวข้อมาตรฐานเริ่มต้น 7 หมวด
 
-## ความสามารถหลัก
+## Tech stack
 
-- Dashboard แสดง 9 ศูนย์หลัก, 23 หอควบคุมย่อย และ coverage 7 หมวด
-- Google OAuth พร้อมขั้นตอนรอ Admin อนุมัติ
-- บทบาท ADMIN, EDITOR และ VIEWER
-- Workflow ร่าง → รอตรวจทาน → ใช้งาน/ส่งกลับ → เก็บถาวร
-- เอกสารแบบ versioned พร้อม private upload, SHA-256 และ ClamAV
-- Notification ในระบบและ Email, audit log แบบ append-only
-- Responsive UI ภาษาไทยและ API documentation ที่ `/api/docs`
+- React 18 + Vite + JavaScript
+- TailwindCSS และ source UI components แนว Shadcn UI
+- Lucide React
+- React Simple Maps 3 + TopoJSON ที่เก็บในโปรเจกต์
+- Context + `useReducer` และ versioned localStorage
+- Vitest + jsdom
 
-## เริ่มพัฒนา
+## เริ่มใช้งาน
 
-1. คัดลอก `.env.example` เป็น `.env` และ `apps/api/.env.example` เป็น `apps/api/.env`
-2. กำหนด Google OAuth callback เป็น `http://localhost:3000/api/v1/auth/google/callback`
-3. รัน `pnpm install`, `pnpm db:generate`, `pnpm db:migrate` และ `pnpm db:seed`
-4. รัน `pnpm dev` แล้วเปิด `http://localhost:5173`
+```bash
+pnpm install
+pnpm dev
+```
 
-สำหรับการติดตั้งภายในองค์กร ให้กำหนด HTTPS FQDN และ secrets ใน `.env` จากนั้นใช้ `docker compose up -d --build` ระบบจะไม่เปิด PostgreSQL, Redis, MinIO หรือ ClamAV ออกสู่เครือข่ายภายนอกโดยตรง
+ทดสอบและ build:
 
-## ข้อมูลเริ่มต้น
+```bash
+pnpm test
+pnpm build
+```
 
-Seed มีชื่อศูนย์หลัก 9 แห่งตามตัวอย่าง ส่วนหอควบคุมย่อย 23 แห่งเป็นข้อมูลตัวอย่าง ต้องแทนที่ด้วยรายชื่อและพิกัดที่องค์กรรับรองก่อน production
+## ขอบเขตข้อมูล
+
+ระบบนี้เป็น prototype แบบ frontend-only ไม่มี authentication, backend API หรือ cloud storage จริง ห้ามนำข้อมูลความมั่นคง ข้อมูลส่วนบุคคล หรือเอกสารจริงมาใช้ ไฟล์เอกสารจำลองจะอยู่ใน browser session เท่านั้นและไม่ถูก persist
+
+## แผนที่และ attribution
+
+ขอบเขตจังหวัดอยู่ที่ `public/maps/thailand-provinces.topo.json` และโหลดจากไฟล์ภายในแอปโดยไม่มี map tile server ภายนอก รายละเอียดแหล่งข้อมูลและสัญญาอนุญาตอยู่ใน `public/maps/ATTRIBUTION.md`
