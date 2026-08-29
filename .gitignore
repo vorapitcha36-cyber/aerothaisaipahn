@@ -1,0 +1,9 @@
+node_modules
+.pnpm-store
+dist
+.vite
+.wrangler
+coverage
+*.log
+.env*
+!.env.example
