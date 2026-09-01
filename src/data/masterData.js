@@ -20,6 +20,7 @@ const area = (id, shortName, type, provinceCode, regionKey, coordinates, parentC
 });
 
 const centerDefinitions = [
+  ["bangkok", "ที่ทำการส่วนกลาง", "TH-10", "central", [100.5167, 13.7563]],
   ["cnx", "เชียงใหม่", "TH-50", "north", [98.9931, 18.7877]],
   ["phs", "พิษณุโลก", "TH-65", "north", [100.2659, 16.8211]],
   ["udon", "อุดรธานี", "TH-41", "northeast", [102.787, 17.4138]],
@@ -32,6 +33,9 @@ const centerDefinitions = [
 ];
 
 const towerDefinitions = [
+  ["don-mueang", "ดอนเมือง", "bangkok", "TH-10", "central", [100.6074, 13.9126],],
+  ["suvarnabhumi","สุวรรณภูมิ","bangkok","TH-11","central",[100.7501, 13.69],],
+  ["thung-maha-mek", "ทุ่งมหาเมฆ", "bangkok", "TH-10", "central", [100.54, 13.715]],
   ["mae-hong-son", "แม่ฮ่องสอน", "cnx", "TH-58", "north", [97.9758, 19.3013]],
   ["chiang-rai", "เชียงราย", "cnx", "TH-57", "north", [99.8325, 19.9105]],
   ["lampang", "ลำปาง", "cnx", "TH-52", "north", [99.5044, 18.2888]],

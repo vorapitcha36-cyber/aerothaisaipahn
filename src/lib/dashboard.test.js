@@ -20,12 +20,12 @@ import {
 const referenceDay = new Date("2026-08-29T05:00:00.000Z");
 
 describe("master data and date rules", () => {
-  it("contains 9 centers, 23 towers, 32 areas, 7 topics and 224 initial records", () => {
-    expect(AREAS.filter((area) => area.type === "center")).toHaveLength(9);
-    expect(AREAS.filter((area) => area.type === "tower")).toHaveLength(23);
-    expect(AREAS).toHaveLength(32);
+  it("contains 10 centers, 26 towers, 36 areas, 7 topics and 252 initial records", () => {
+    expect(AREAS.filter((area) => area.type === "center")).toHaveLength(10);
+    expect(AREAS.filter((area) => area.type === "tower")).toHaveLength(26);
+    expect(AREAS).toHaveLength(36);
     expect(COMPLIANCE_TOPICS).toHaveLength(7);
-    expect(createRecords()).toHaveLength(224);
+    expect(createRecords()).toHaveLength(252);
   });
 
   it("adds six or twelve months and clamps month-end dates", () => {
@@ -46,9 +46,9 @@ describe("master data and date rules", () => {
 describe("selectors, reducer and persistence", () => {
   it("derives KPI values from records instead of constants", () => {
     const state = createInitialState();
-    expect(getKpis(state, referenceDay)).toMatchObject({ centers: 9, towers: 23, pending: 224, completion: 0 });
+    expect(getKpis(state, referenceDay)).toMatchObject({ centers: 10, towers: 26, pending: 252, completion: 0 });
     state.complianceRecords[0] = { ...state.complianceRecords[0], lastReviewDate: "2026-01-01", nextReviewDate: "2027-01-01" };
-    expect(getKpis(state, referenceDay)).toMatchObject({ pending: 223, completion: 0 });
+    expect(getKpis(state, referenceDay)).toMatchObject({ pending: 251, completion: 0 });
   });
 
   it("selects a tower and synchronizes its parent center", () => {
@@ -60,10 +60,10 @@ describe("selectors, reducer and persistence", () => {
   it("adds a custom topic with one pending record per area and soft-deletes it", () => {
     const topic = { id: "custom-a", name: "หัวข้อทดสอบ", shortName: "หัวข้อทดสอบ", reviewIntervalMonths: 12, active: true };
     const added = dashboardReducer(createInitialState(), { type: "ADD_CUSTOM_TOPIC", topic });
-    expect(added.complianceRecords.filter((record) => record.topicId === topic.id)).toHaveLength(32);
+    expect(added.complianceRecords.filter((record) => record.topicId === topic.id)).toHaveLength(36);
     const toggled = dashboardReducer(added, { type: "TOGGLE_CUSTOM_TOPIC", topicId: topic.id });
     expect(toggled.topics.find((item) => item.id === topic.id).active).toBe(false);
-    expect(toggled.complianceRecords.filter((record) => record.topicId === topic.id)).toHaveLength(32);
+    expect(toggled.complianceRecords.filter((record) => record.topicId === topic.id)).toHaveLength(36);
   });
 
   it("builds reminders only for active topics", () => {
@@ -84,7 +84,7 @@ describe("selectors, reducer and persistence", () => {
 
   it("falls back safely when localStorage has corrupt or mismatched data", () => {
     window.localStorage.setItem(STORAGE_KEY, "not-json");
-    expect(hydrateState().complianceRecords).toHaveLength(224);
+    expect(hydrateState().complianceRecords).toHaveLength(252);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 99, records: [] }));
     expect(hydrateState().topics).toHaveLength(7);
   });

@@ -118,12 +118,17 @@ img { max-width: 100%; }
 .region-legend { position: absolute; z-index: 4; right: 12px; bottom: 10px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px 8px; padding: 8px 10px; pointer-events: none; color: #38556d; font-size: .6rem; border: 1px solid rgba(210,224,233,.9); border-radius: 7px; background: rgba(255,255,255,.91); }
 .region-legend i { width: 8px; height: 8px; border-radius: 2px; }
 .map-marker { cursor: pointer; }
-.map-marker text { font-family: "Leelawadee UI", Tahoma, sans-serif; font-weight: 800; paint-order: stroke; stroke: rgba(255,255,255,.94); stroke-width: 3px; stroke-linejoin: round; }
+.map-marker text { font-family: "Leelawadee UI", Tahoma, sans-serif; font-weight: 800; paint-order: stroke; stroke: rgba(255,255,255,.96); stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
 .marker-hit { fill: transparent; stroke: transparent; }
-.marker-ring { fill: rgba(255,255,255,.97); stroke: #0f766e; stroke-width: 2; }
-.marker-hit.is-selected .marker-ring { stroke: #ee7b31; stroke-width: 3; }
-.marker-dot { fill: #0f766e; stroke: #fff; stroke-width: 1.5; }
-.marker-hit.is-selected .marker-dot { fill: #ec6c24; }
+.marker-ring { fill: rgba(255,255,255,.92); stroke: #0f766e; stroke-width: 2; }
+.map-marker.is-selected .marker-ring { stroke: #ea580c; stroke-width: 2.5; }
+.map-marker.is-hovered:not(.is-selected) .marker-ring { stroke: #0284c7; stroke-width: 1.5; stroke-dasharray: 2 2; }
+.marker-dot { fill: #0f766e; stroke: #fff; stroke-width: 1.5; transition: fill .15s ease, transform .15s ease; }
+.map-marker--tower .marker-dot { fill: #0284c7; }
+.map-marker.is-selected .marker-dot { fill: #ea580c; }
+.map-marker.is-hovered .marker-dot { fill: #f97316; }
+.marker-label.tower-label.selected { fill: #c2410c; font-weight: 900; }
+.marker-label.tower-label.hovered { fill: #0369a1; }
 .map-fallback { min-height: 480px; display: grid; align-content: center; justify-items: center; gap: 10px; padding: 28px; color: #66788a; text-align: center; }
 .map-fallback svg { color: #b3464e; }
 .map-fallback strong { color: #28465f; }

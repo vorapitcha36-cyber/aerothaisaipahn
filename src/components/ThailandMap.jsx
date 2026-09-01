@@ -12,7 +12,9 @@ export default function ThailandMap() {
   const [geography, setGeography] = useState(null);
   const [mapError, setMapError] = useState(false);
   const [position, setPosition] = useState({ coordinates: [101, 13], zoom: 1 });
+  const [hoveredAreaId, setHoveredAreaId] = useState(null);
   const selectedArea = state.areas.find((area) => area.id === state.selectedAreaId);
+  const isTowerSelected = selectedArea?.type === "tower";
   const visibleMarkers = useMemo(() => state.areas.filter((area) => area.type === "center" || area.parentCenterId === state.selectedCenterId), [state.areas, state.selectedCenterId]);
 
   useEffect(() => {
@@ -56,14 +58,40 @@ export default function ThailandMap() {
           )}
           {visibleMarkers.map((area) => {
             const selected = area.id === state.selectedAreaId;
+            const hovered = area.id === hoveredAreaId;
             const center = area.type === "center";
+            const isParentOfSelectedTower = isTowerSelected && area.id === state.selectedCenterId;
+            const showLabel = hovered || selected || (center && !isParentOfSelectedTower);
             return (
               <Marker key={area.id} coordinates={area.coordinates}>
-                <g className={`map-marker ${center ? "map-marker--center" : "map-marker--tower"} ${selected ? "is-selected" : ""}`} role="button" tabIndex={0} aria-label={`เลือก${area.name}`} onClick={() => selectArea(area.id)} onKeyDown={(event) => markerKeyDown(event, area.id)}>
-                  <circle className="marker-hit" r={20 / position.zoom} />
-                  {selected && <circle className="marker-ring" r={(center ? 11 : 8) / position.zoom} />}
+                <g
+                  className={`map-marker ${center ? "map-marker--center" : "map-marker--tower"} ${selected ? "is-selected" : ""} ${hovered ? "is-hovered" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`เลือก${area.name}`}
+                  onClick={() => selectArea(area.id)}
+                  onKeyDown={(event) => markerKeyDown(event, area.id)}
+                  onMouseEnter={() => setHoveredAreaId(area.id)}
+                  onMouseLeave={() => setHoveredAreaId(null)}
+                  onFocus={() => setHoveredAreaId(area.id)}
+                  onBlur={() => setHoveredAreaId(null)}
+                >
+                  <title>{area.name}</title>
+                  <circle className="marker-hit" r={22 / position.zoom} />
+                  {(selected || hovered) && (
+                    <circle className="marker-ring" r={(center ? 12 : 9) / position.zoom} />
+                  )}
                   <circle className="marker-dot" r={(center ? 6.5 : 4.5) / position.zoom} />
-                  <text className={`marker-label ${center ? "center-label" : "tower-label"} ${selected ? "selected" : ""}`} textAnchor="middle" y={(center ? -12 : -9) / position.zoom} fontSize={(center ? 10.5 : 9.5) / position.zoom}>{area.shortName}</text>
+                  {showLabel && (
+                    <text
+                      className={`marker-label ${center ? "center-label" : "tower-label"} ${selected ? "selected" : ""} ${hovered && !selected ? "hovered" : ""}`}
+                      textAnchor="middle"
+                      y={(center ? -13 : -10) / position.zoom}
+                      fontSize={(center ? 11 : 9.5) / position.zoom}
+                    >
+                      {area.shortName}
+                    </text>
+                  )}
                 </g>
               </Marker>
             );
@@ -71,7 +99,8 @@ export default function ThailandMap() {
         </ZoomableGroup>
       </ComposableMap>
       <div className="map-legends">
-        <span><Building2 size={14} /> ศูนย์หลัก</span><span><TowerControl size={14} /> หอลูกข่ายของศูนย์ที่เลือก</span>
+        <span><Building2 size={14} /> ศูนย์หลัก</span>
+        <span><TowerControl size={14} /> หอลูกข่าย (ชี้/คลิกจุดเพื่อดูชื่อ)</span>
       </div>
       <div className="region-legend" aria-label="คำอธิบายสีภูมิภาค">
         {Object.entries(REGION_LABELS).map(([key, label]) => <span key={key}><i style={{ backgroundColor: REGION_COLORS[key] }} />{label.replace("ภาค", "")}</span>)}
